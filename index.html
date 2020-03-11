@@ -29,7 +29,10 @@
 
       camera.updateProjectionMatrix();
     })
-    renderer.render(scene, camera)
+
+    var raycaster = new THREE.Raycaster()
+    var mouse = new THREE.Vector2();
+
 
     var geometry = new THREE.BoxGeometry(1, 1, 1);
     var material = new THREE.MeshLambertMaterial({
@@ -38,8 +41,8 @@
     var mesh = new THREE.Mesh(geometry, material)
 
 
-    mesh.rotation.set(45, 0, 0)
-    mesh.scale.set(1, 2, 1)
+    // mesh.rotation.set(45, 0, 0)
+    // mesh.scale.set(1, 2, 1)
 
 
 
@@ -50,11 +53,48 @@
     scene.add(light)
     var render = () => {
       requestAnimationFrame(render)
-      mesh.rotation.x += 0.01;
-      mesh.rotation.y += 0.02
       renderer.render(scene, camera)
     }
+
+    const onMouseMove = event => {
+      event.preventDefault();
+      mouse.x = (event.clientX / window.innerWidth) * 2 - 1
+      mouse.y = (event.clientY / window.innerHeight) * 2 + 1
+
+      raycaster.setFromCamera(mouse, camera)
+
+      var intersects = raycaster.intersectObjects(scene.children, true)
+      for (var i = 0; i < intersects.length; i++) {
+        intersects[i].object.material.color.set(0xff0000)
+      }
+    }
     render()
+
+    this.tl = new TimelineMax({
+      paused: true
+    })
+    this.tl.to(this.mesh.scale, 1, {
+      x: 2,
+      ease: Expo.easeOut
+    })
+    this.tl.to(this.mesh.scale, .5, {
+      x: .5,
+      ease: Expo.easeOut
+    })
+    this.tl.to(this.mesh.position, .5, {
+      x: 2,
+      ease: Expo.easeOut
+    })
+    this.tl.to(this.mesh.rotation, .5, {
+      y: Math.PI * .5,
+      ease: Expo.easeOut
+    }, "=-1.5")
+
+
+    document.body.addEventListener('click', () => {
+      this.tl.play();
+    })
+    // window.addEventListener('mousemove', onMouseMove)
   </script>
 </body>
 
